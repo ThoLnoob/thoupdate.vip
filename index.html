@@ -5,6 +5,7 @@
   <title>Tho Lnoob Update - Verify</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    /* --- existing styles (kept) --- */
     body {
       margin: 0;
       height: 100vh;
@@ -120,16 +121,103 @@
       z-index: 10; border-top: 1px solid rgba(0,255,200,0.3);
     }
     .ticker { display: inline-block; white-space: nowrap; animation: marquee 15s linear infinite; padding-left: 100%; }
-    .ticker-item { 
-      display: inline-block; 
-      margin-right: 60px; 
-      font-size: 16px; 
-      font-weight: bold; 
+    .ticker-item {
+      display: inline-block;
+      margin-right: 60px;
+      font-size: 16px;
+      font-weight: bold;
       color: #00ffe0;
       text-shadow: 0 0 8px #00ffe0, 0 0 15px rgba(0,255,200,0.7);
     }
 
     @keyframes marquee { 0%{transform:translateX(0%);}100%{transform:translateX(-100%);} }
+
+    /* --- modal viewer styles --- */
+    .viewer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(3,8,10,0.85);
+      display: none; /* show via JS */
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      padding: 20px;
+    }
+
+    .viewer-box {
+      width: 100%;
+      max-width: 1100px;
+      height: 85vh;
+      background: #071014;
+      border-radius: 12px;
+      box-shadow: 0 0 40px rgba(0,255,200,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(0,255,200,0.08);
+    }
+
+    .viewer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: linear-gradient(90deg, rgba(0,255,224,0.03), rgba(255,255,255,0.01));
+      gap: 8px;
+    }
+    .viewer-title { color: #00ffe0; font-weight: 700; font-size: 15px; }
+    .viewer-controls { display:flex; gap: 8px; align-items:center; }
+
+    .viewer-btn {
+      border: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn-close { background: #222; color: #fff; }
+    .btn-open { background: #00ffe0; color: #040404; }
+
+    .viewer-frame {
+      flex: 1;
+      background: #000;
+      position: relative;
+    }
+    .viewer-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: white;
+    }
+
+    .viewer-spinner {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      color: #aaa;
+    }
+    .small-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #333;
+      border-top: 3px solid #00ffe0;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    /* responsive tweaks */
+    @media (max-width: 700px) {
+      .viewer-box { height: 88vh; max-width: 980px; }
+    }
+    @media (max-width: 420px) {
+      #captcha-box { padding: 18px; }
+      .viewer-box { max-width: 380px; height: 85vh; }
+    }
   </style>
 </head>
 <body>
@@ -153,6 +241,26 @@
   </div>
 </div>
 
+<!-- Viewer modal (hidden until verified) -->
+<div id="viewer-overlay" class="viewer-overlay" aria-hidden="true">
+  <div class="viewer-box" role="dialog" aria-modal="true" aria-label="Viewer">
+    <div class="viewer-top">
+      <div class="viewer-title">Secure Viewer</div>
+      <div class="viewer-controls">
+        <button id="open-external" class="viewer-btn btn-open" title="Open in new tab">Open in new tab</button>
+        <button id="close-viewer" class="viewer-btn btn-close" title="Close viewer">Close</button>
+      </div>
+    </div>
+    <div class="viewer-frame">
+      <div id="viewer-spinner" class="viewer-spinner">
+        <div class="small-spinner"></div>
+        <div id="viewer-status" style="color:#00ffe0">Đang tải nội dung, vui lòng đợi...</div>
+      </div>
+      <iframe id="viewer-iframe" sandbox="allow-forms allow-scripts allow-same-origin allow-popups"></iframe>
+    </div>
+  </div>
+</div>
+
 <!-- 🔹 Thanh ticker chữ -->
 <div class="ticker-wrap">
   <div id="ticker" class="ticker">
@@ -165,35 +273,39 @@
 </div>
 
 <script>
+  // encoded URL (base64) — giữ nguyên
   const encodedURL = "aHR0cHM6Ly9ub3Rldm4uY29tL3NoYXJlL2RlMXY1cjQw";
   function decodeURL(encoded) { return atob(encoded); }
+  const targetURL = decodeURL(encodedURL);
 
-  const timeoutSeconds = 60; 
+  // countdown
+  const timeoutSeconds = 60;
   let remaining = timeoutSeconds;
   const timerEl = document.getElementById("timer");
   const countdown = setInterval(() => {
     remaining--;
     timerEl.textContent = "expires later: " + remaining + " Seconds";
-    if(remaining <= 0){
+    if (remaining <= 0) {
       clearInterval(countdown);
       alert("Captcha expired. Please reload the page to re-authenticate.");
       location.reload();
     }
   }, 1000);
 
+  // elements
   const checkbox = document.getElementById("captcha-checkbox");
   const spinner = document.getElementById("spinner");
   const verifyBtn = document.getElementById("verify-btn");
   const message = document.getElementById("message");
 
   checkbox.addEventListener("change", function() {
-    if(checkbox.checked){
-      spinner.style.display = "inline-block"; 
+    if (checkbox.checked) {
+      spinner.style.display = "inline-block";
       checkbox.disabled = true;
       verifyBtn.disabled = true;
       verifyBtn.classList.remove("enabled");
       setTimeout(() => {
-        spinner.style.display = "none"; 
+        spinner.style.display = "none";
         checkbox.disabled = false;
         verifyBtn.disabled = false;
         verifyBtn.classList.add("enabled");
@@ -204,43 +316,140 @@
     }
   });
 
-  verifyBtn.addEventListener("click", () => {
-    if(verifyBtn.disabled) return;
-    if(checkbox.checked){
+  // viewer modal elements
+  const viewerOverlay = document.getElementById('viewer-overlay');
+  const viewerIframe = document.getElementById('viewer-iframe');
+  const viewerSpinner = document.getElementById('viewer-spinner');
+  const viewerStatus = document.getElementById('viewer-status');
+  const openExternalBtn = document.getElementById('open-external');
+  const closeViewerBtn = document.getElementById('close-viewer');
+
+  // show viewer (embed iframe) instead of navigating away
+  async function showViewer(url) {
+    viewerOverlay.style.display = 'flex';
+    viewerOverlay.setAttribute('aria-hidden', 'false');
+    viewerSpinner.style.display = 'flex';
+    viewerStatus.textContent = 'Đang tải nội dung, vui lòng đợi...';
+    viewerIframe.src = url;
+
+    // set fallback if content doesn't appear or site blocks framing
+    let fallback = false;
+    const fallbackTimeout = 5000; // 5s để detect
+    let loaded = false;
+
+    function onLoadHandler() {
+      loaded = true;
+      // hide spinner - we cannot reliably inspect cross-origin content, assume loaded
+      viewerSpinner.style.display = 'none';
+      viewerStatus.textContent = 'Nội dung đã tải (nếu trống, trang có thể chặn nhúng).';
+    }
+    viewerIframe.addEventListener('load', onLoadHandler, { once: true });
+
+    // after timeout, if not loaded visually, show fallback hint and enable Open in new tab
+    setTimeout(() => {
+      if (!loaded) {
+        viewerSpinner.style.display = 'none';
+        viewerStatus.textContent = 'Không thể hiển thị nội dung trong trang. (Trang có thể chặn nhúng).';
+      }
+      openExternalBtn.style.display = 'inline-block';
+    }, fallbackTimeout);
+  }
+
+  // hide viewer
+  function hideViewer() {
+    viewerIframe.src = 'about:blank';
+    viewerOverlay.style.display = 'none';
+    viewerOverlay.setAttribute('aria-hidden', 'true');
+    openExternalBtn.style.display = 'none';
+  }
+
+  // fallback open in new tab
+  openExternalBtn.addEventListener('click', () => {
+    window.open(targetURL, '_blank', 'noopener');
+  });
+  closeViewerBtn.addEventListener('click', hideViewer);
+
+  // verify button: show viewer instead of redirect
+  verifyBtn.addEventListener('click', () => {
+    if (verifyBtn.disabled) return;
+    if (checkbox.checked) {
       clearInterval(countdown);
-      message.textContent = "Wait 3 seconds...";
-      setTimeout(() => {
-        window.location.href = decodeURL(encodedURL);
-      }, 3000);
+      message.textContent = "Đang mở nội dung trong trang, giữ nguyên ở đây...";
+      // show embedded viewer
+      showViewer(targetURL);
     }
   });
 
   // ===============================
-  // 🔒 Chặn chuột phải + DevTools
+  // 🔒 Chặn chuột phải + DevTools + reload nhẹ
   // ===============================
   document.addEventListener("contextmenu", function(e) {
     e.preventDefault();
-    alert("🚫");
+    // không thông báo alert lớn nữa (người dùng sẽ khó chịu)
+  });
+
+  // beforeunload: cảnh báo reload/close vô tình
+  window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
   });
 
   document.onkeydown = function(e) {
-    if (e.keyCode == 123) { // F12
-      alert("🚫");
+    // F12
+    if (e.keyCode == 123) {
+      e.preventDefault();
       return false;
     }
+    // Ctrl+Shift+I/J/C
     if (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) {
-      alert("🚫");
+      e.preventDefault();
       return false;
     }
-    if (e.ctrlKey && e.keyCode == 85) { // Ctrl+U
-      alert("🚫");
+    // Ctrl+U view-source
+    if (e.ctrlKey && e.keyCode == 85) {
+      e.preventDefault();
       return false;
     }
-    if (e.ctrlKey && e.keyCode == 83) { // Ctrl+S
-      alert("🚫");
+    // Ctrl+R / F5
+    if ((e.ctrlKey || e.metaKey) && e.keyCode === 82) {
+      e.preventDefault();
+      return false;
+    }
+    if (e.keyCode === 116) { // F5
+      e.preventDefault();
+      return false;
+    }
+    // Ctrl+S
+    if (e.ctrlKey && e.keyCode == 83) {
+      e.preventDefault();
       return false;
     }
   };
+
+  // small devtools detection - show overlay if detected (not perfect)
+  (function detectDevTools() {
+    const threshold = 160;
+    setInterval(() => {
+      const widthDiff = Math.abs(window.outerWidth - window.innerWidth);
+      const heightDiff = Math.abs(window.outerHeight - window.innerHeight);
+      if (widthDiff > threshold || heightDiff > threshold) {
+        // show a subtle overlay (we won't wipe content)
+        if (!document.getElementById('dt-block')) {
+          const ov = document.createElement('div');
+          ov.id = 'dt-block';
+          ov.style = 'position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.85);color:#fff;display:flex;align-items:center;justify-content:center;z-index:999998;font-size:18px;padding:20px;text-align:center';
+          ov.innerHTML = 'Phát hiện DevTools — truy cập bị hạn chế. Vui lòng tắt DevTools để tiếp tục.';
+          document.body.appendChild(ov);
+        }
+      } else {
+        const ex = document.getElementById('dt-block');
+        if (ex) ex.remove();
+      }
+    }, 1000);
+  })();
+
+  // hide openExternal button initially
+  openExternalBtn.style.display = 'none';
 </script>
 
 </body>
