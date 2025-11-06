@@ -282,7 +282,7 @@ document.getElementById("key-btn").onclick = () => {
   if (key === "FREE_thodeptrai") {
     localStorage.setItem("tho_key", key);
     localStorage.setItem("tho_key_time", Date.now());
-    msg.textContent = "✅ Key hợp lệ! Đang mở verify...";
+    msg.textContent = "✅ Key hợp lệ! Đang chuyển tiếp...";
     setTimeout(() => {
       keyBox.style.display = "none";
       captchaBox.style.display = "block";
@@ -351,4 +351,5 @@ document.onkeydown = e => {
 </script>
 </body>
 </html>
+
 
