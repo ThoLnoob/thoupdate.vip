@@ -43,7 +43,7 @@
 <body>
 
 <h1 id="ban-title">You Got Ban IP</h1>
-<p id="ban-sub">Do not use fake VPN or tools to interfere with the website.</p>
+<p id="ban-sub">Do not use fake VPN or tools to interfere with the website. If there is any error please contact @tholnoob (discord)</p>
 
 <script>
 const lang = navigator.language || navigator.userLanguage;
@@ -51,11 +51,11 @@ const lang = navigator.language || navigator.userLanguage;
 if (lang.toLowerCase().startsWith("vi")) {
   document.documentElement.lang = "vi";
   document.getElementById("ban-title").textContent = "Bạn đã bị chặn IP";
-  document.getElementById("ban-sub").textContent = "Đừng sử dụng fake VPN hoặc công cụ can thiệp vào trang web.";
+  document.getElementById("ban-sub").textContent = "Đừng sử dụng fake VPN hoặc công cụ can thiệp vào trang web. Nếu xảy ra lỗi hãy liên hệ với @tholnoob (discord)";
 } else {
   document.documentElement.lang = "en";
   document.getElementById("ban-title").textContent = "You Got Ban IP";
-  document.getElementById("ban-sub").textContent = "Do not use fake VPN or tools to interfere with the website.";
+  document.getElementById("ban-sub").textContent = "Do not use fake VPN or tools to interfere with the website. If there is any error please contact @tholnoob (discord)";
 }
 
 // ✅ Chặn mở DevTools (F12, dấu 3 chấm, Ctrl+Shift+I,...)
@@ -79,4 +79,5 @@ document.onkeydown = e => {
 </script>
 </body>
 </html>
+
 
