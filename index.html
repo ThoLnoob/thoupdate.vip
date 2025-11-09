@@ -58,13 +58,15 @@ if (lang.toLowerCase().startsWith("vi")) {
   document.getElementById("ban-sub").textContent = "Do not use fake VPN or tools to interfere with the website.";
 }
 
+// ✅ Chặn mở DevTools (F12, dấu 3 chấm, Ctrl+Shift+I,...)
 setInterval(() => {
   const threshold = 160;
   if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-    document.body.innerHTML = "<h1 style='color:#00ffe0;text-shadow:0 0 25px #00ffe0;font-family:Poppins,sans-serif;'>You Got Ban IP</h1><p style='color:#ddd;'>Do not use fake VPN or tools to interfere with the website.</p>";
+    window.location.href = "about:blank"; // ← chuyển thẳng sang trang trắng
   }
 }, 1000);
 
+// ✅ Chặn chuột phải và các tổ hợp phím dev
 document.addEventListener("contextmenu", e => e.preventDefault());
 document.onkeydown = e => {
   if (e.keyCode == 123) return false; // F12
