@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Tho Lnoob Update - Verify</title>
+<title>Tho Lnoob Update</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body {
@@ -238,7 +238,6 @@
 const encodedURL = "aHR0cHM6Ly9ub3Rldm4uY29tL3NoYXJlL2RlMXY1cjQw";
 const targetURL = atob(encodedURL);
 
-// Khôi phục trạng thái từ localStorage
 const savedKey = localStorage.getItem("tho_key");
 const savedTime = localStorage.getItem("tho_key_time");
 const now = Date.now();
@@ -275,7 +274,6 @@ if (savedKey === "FREE_thodeptrai" && savedTime && now - savedTime < 86400000) {
   localStorage.removeItem("tho_key_time");
 }
 
-// Xác nhận key
 document.getElementById("key-btn").onclick = () => {
   const key = document.getElementById("key-input").value.trim();
   const msg = document.getElementById("key-msg");
@@ -294,7 +292,6 @@ document.getElementById("key-btn").onclick = () => {
   }
 };
 
-// Captcha verify
 const checkbox = document.getElementById("captcha-checkbox");
 const verifyBtn = document.getElementById("verify-btn");
 checkbox.addEventListener("change", function() {
@@ -319,7 +316,6 @@ verifyBtn.onclick = () => {
   }
 };
 
-// Fix lỗi back không thoát
 window.onpopstate = (e) => {
   if (e.state && e.state.page === "verify") {
     captchaBox.style.display = "block";
@@ -352,4 +348,5 @@ document.onkeydown = e => {
 <script src="report.js"></script>
 </body>
 </html>
+
 
