@@ -325,31 +325,17 @@ window.onpopstate = (e) => {
     keyBox.style.display = "block";
   }
 };
+
+// === Chặn chuột phải và phím tắt ===
+document.addEventListener("contextmenu", e => e.preventDefault());
+document.onkeydown = e => {
+  if (e.keyCode == 123) return false; // F12
+  if (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74 || e.keyCode == 67)) return false; // Ctrl+Shift+I/J/C
+  if (e.ctrlKey && e.keyCode == 85) return false; // Ctrl+U
+};
 </script>
 
-<!-- === Detect DevTools chỉ khi mở === -->
-<script>
-(function() {
-  let devtoolsOpen = false;
-  function detectDevTools() {
-    const threshold = 160;
-    const widthThreshold = window.outerWidth - window.innerWidth > threshold;
-    const heightThreshold = window.outerHeight - window.innerHeight > threshold;
-    if ((widthThreshold || heightThreshold) && !devtoolsOpen) {
-      devtoolsOpen = true;
-      window.location.href = "about:blank";
-    }
-  }
-  setInterval(detectDevTools, 500);
-
-  // Chặn phím F12, Ctrl+Shift+I/J
-  document.onkeydown = e => {
-    if (e.keyCode == 123) return false;
-    if (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) return false;
-  };
-})();
-</script>
-
+<!-- === Report modal === -->
 <script>
 (() => {
   const WEBHOOK_URL = "https://discord.com/api/webhooks/1437387889221566558/e_ykUeOBlhxF0jXGTcOxTOyXEmumc_PXuIgcpLByh4-dPIgpPwVNSGuPb_qvdFGYCAtV"; 
