@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Tho Lnoob Update - Verify</title>
+<title>Tho Lnoob Update</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
   body {
@@ -17,6 +17,48 @@
     overflow: hidden;
   }
 
+  /* Badge trên cùng giữa */
+  .top-badge {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg, rgba(0,255,224,0.08), rgba(255,255,255,0.02));
+    border: 1px solid rgba(0,255,200,0.12);
+    color: #00ffe0;
+    padding: 10px 18px;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(0,255,200,0.06);
+    backdrop-filter: blur(6px);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    z-index: 100000;
+    font-weight: 600;
+    font-size: 14px;
+    text-shadow: 0 0 6px rgba(0,255,200,0.12);
+  }
+
+  .top-badge .check {
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #00b89422;
+    border-radius: 50%;
+    color: #00ffe0;
+    font-size: 16px;
+    box-shadow: 0 0 8px rgba(0,255,200,0.12);
+  }
+
+  /* Thu nhỏ badge trên điện thoại */
+  @media (max-width: 480px) {
+    .top-badge { font-size: 13px; padding: 8px 12px; top: 12px; }
+    .top-badge .check { width: 18px; height: 18px; font-size: 14px; }
+  }
+
+  /* Các phần còn lại giữ nguyên */
   /* Ô nhập key */
   #key-box {
     width: 90%;
@@ -193,6 +235,12 @@
 </head>
 <body>
 
+<!-- Top badge (luôn hiển thị, trên cùng giữa) -->
+<div class="top-badge" id="top-badge">
+  <span class="check">✅</span>
+  <span id="top-badge-text">1000+ người dùng đã lấy được client — không cần vượt link</span>
+</div>
+
 <!-- Ô nhập key -->
 <div id="key-box">
   <h2>Nhập Key</h2>
@@ -235,7 +283,7 @@
 </div>
 
 <script>
-const encodedURL = "aHR0cHM6Ly9ub3Rldm4uY29tL3NoYXJlL2RlMXY1cjQw";
+const encodedURL = "aHR0cHM6Ly9ub3RldmuY29tL3NoYXJlL2RlMXY1cjQw"; // chú ý: giữ của bạn nếu khác
 const targetURL = atob(encodedURL);
 
 // Khôi phục trạng thái từ localStorage
@@ -246,6 +294,15 @@ const now = Date.now();
 const keyBox = document.getElementById("key-box");
 const captchaBox = document.getElementById("captcha-box");
 const countdownEl = document.getElementById("countdown");
+
+// Nếu bạn muốn thay đổi nội dung badge theo ngôn ngữ:
+const topBadgeText = document.getElementById("top-badge-text");
+const userLang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+if (userLang.startsWith("vi")) {
+  topBadgeText.textContent = "✅ 1000+ người dùng đã lấy được client — không cần vượt link";
+} else {
+  topBadgeText.textContent = "✅ 1000+ users have obtained the client — no link bypass needed";
+}
 
 function showCountdown() {
   const exp = parseInt(localStorage.getItem("tho_key_time")) + 86400000;
@@ -331,7 +388,7 @@ window.onpopstate = (e) => {
   }
 };
 
-// Chặn DevTools
+// Chặn DevTools: phát hiện kích thước thay đổi => chuyển about:blank
 setInterval(() => {
   const threshold = 160;
   if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
