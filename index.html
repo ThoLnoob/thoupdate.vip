@@ -347,6 +347,7 @@ document.onkeydown = e => {
 <script>
 (() => {
   const WEBHOOK_URL = "https://discord.com/api/webhooks/1437387889221566558/e_ykUeOBlhxF0jXGTcOxTOyXEmumc_PXuIgcpLByh4-dPIgpPwVNSGuPb_qvdFGYCAtV"; 
+  const cooldownKey = "tho_report_time";
 
   const popupHTML = `
     <div id="reportModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:120000;">
@@ -387,6 +388,17 @@ document.onkeydown = e => {
   };
 
   document.getElementById("sendReportBtn").onclick = async () => {
+    const lastTime = parseInt(localStorage.getItem(cooldownKey)) || 0;
+    const now = Date.now();
+    if (now - lastTime < 2 * 60 * 60 * 1000) {
+      const remaining = 2*60*60*1000 - (now - lastTime);
+      const h = Math.floor(remaining / (1000*60*60));
+      const m = Math.floor((remaining / (1000*60)) % 60);
+      const s = Math.floor((remaining / 1000) % 60);
+      document.getElementById("reportStatus").textContent = `⏳ Bạn phải đợi ${h}h ${m}m ${s}s để gửi tiếp`;
+      return;
+    }
+
     const type = document.getElementById("reportType").value;
     const message = document.getElementById("reportMsg").value.trim();
     const status = document.getElementById("reportStatus");
@@ -405,7 +417,8 @@ document.onkeydown = e => {
       };
       const resp = await fetch(WEBHOOK_URL, {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
       if (resp.ok) {
-        status.textContent = "✅ Gửi thành công. Cảm ơn!";
+        localStorage.setItem(cooldownKey, now);
+        status.textContent = "✅ Gửi thành công. Cảm ơn chúng tôi sẽ cố gắng khắc phục!";
         document.getElementById("reportMsg").value = "";
         setTimeout(()=>{ modal.style.display="none"; status.textContent=""; },1200);
       } else {
@@ -420,3 +433,4 @@ document.onkeydown = e => {
 
 </body>
 </html>
+
